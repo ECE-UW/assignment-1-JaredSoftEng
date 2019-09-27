@@ -28,7 +28,7 @@ def seg_intersect(a1,a2, b1,b2) :
 def intersect_on_line(x1, x2, x3, x4) :
     tdenom = (x4[0]-x3[0])*(x1[1]-x2[1])-(x1[0]-x2[0])*(x4[1]-x3[1])
     if tdenom == 0: # Lines are co-linear
-        print 'coincident'
+        # print 'coincident'
         return 2
     ta = abs(((x3[1]-x4[1])*(x1[0]-x3[0])-(x4[0]-x3[0])*(x1[1]-x3[1]))/tdenom)
     tb = abs(((x1[1]-x2[1])*(x1[0]-x3[0])-(x2[0]-x1[0])*(x1[1]-x3[1]))/tdenom)
@@ -212,8 +212,17 @@ def make_edges(lines, ints):
     index = 1
     for line in lines:
         sorted_ints = find_ints_on_line(line[0], line[1], ints)
-        sorted_ints[:0] = [line[0]]
-        sorted_ints.append(line[1])
+        line_0_exists = False
+        line_1_exists = False
+        for val in sorted_ints:
+            if np.array_equal(val, line[0]):
+                line_0_exists = True
+            if np.array_equal(val, line[1]):
+                line_1_exists = True
+        if line_0_exists == False:
+            sorted_ints[:0] = [line[0]]
+        if line_1_exists == False:
+            sorted_ints.append(line[1])
         counter = 1
         for val in sorted_ints:
             if counter == 1:
@@ -263,18 +272,30 @@ def make_graph(line):
                         I = seg_intersect(a1,a2, b1,b2)
                         add_vertices(a1, a2, I)
                         add_vertices(b1, b2, I)
-                    # if intersect_on_line == 2:
-                    #     add_coincident_lines(a1,a2,b1,b2)
+                    if intersect_on_line == 2:
+                        I = seg_intersect(a1,a2, b1,b2)
+                        print I
+                        if I <> []:
+                          add_coincident_lines(a1,a2,b1,b2)
                     b1 = b2
             a1 = a2
 
     counter = 0
+    for val in intercepts:
+        for val2 in endpoints:
+            if np.array_equal(val2, val):
+                removearray(endpoints, val)
     for val in endpoints:
         counter = counter + 1
         V.update({counter:val})
     for val in intercepts:
-        counter = counter + 1
-        V.update({counter:val})
+        val_exist = False
+        for val2 in V:
+            if np.array_equal(val2, val):
+                val_exist = True
+        if val_exist == False:
+            counter = counter + 1
+            V.update({counter:val})
 
     print 'V = {'
     for elem in V:
@@ -295,6 +316,14 @@ def make_graph(line):
             print('   <{},{}>,'.format(E[elem][0], E[elem][1]))
     print '}'
 
+def removearray(L,arr):
+    ind = 0
+    size = len(L)
+    while ind != size and not np.array_equal(L[ind],arr):
+        ind += 1
+    if ind != size:
+        L.pop(ind)
+
 def streets_add(line):
     # Parse line for "Streetname"
     streetname = line.split('"')[1]
@@ -304,6 +333,9 @@ def streets_add(line):
             sys.stdout.write("Error: The street '" + streetname + "' already exists.")
             return(0)
     vertices = line.split('"')[2].replace(" ","").replace(")(",")!!(").replace("\n","").replace("(","").replace(")","").split("!!")
+    if len(vertices) < 2:
+        sys.stdout.write("Error: The street needs to have at least two points.")
+        return(0)
     streets.update({streetname:vertices})
     return 1
 
@@ -317,8 +349,12 @@ def streets_change(line):
     if street_exists == False:
         sys.stdout.write("Error: The street '" + streetname + "' does not exist.")
         return(0)
-    streets_remove(line)
     vertices = line.split('"')[2].replace(" ","").replace(")(",")!!(").replace("\n","").replace("(","").replace(")","").split("!!")
+    if len(vertices) < 2:
+        sys.stdout.write("Error: The street needs to have at least two points.")
+        return(0)
+
+    streets_remove(line)
     streets.update({streetname:vertices})
     return 1
 
@@ -416,7 +452,7 @@ while True:
         if line[:1] in ['a', "A"]:
             if streets_add(line) == 0:
                 sys.stdout.write('\n')
-            print streets
+            # print streets
         if line[:1] in ['c', 'C']:
             if streets_change(line) == 0:
                 sys.stdout.write('\n')
