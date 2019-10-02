@@ -69,7 +69,7 @@ def getKeysByValue(dictOfElements, valueToFind):
     return  listOfKeys
 
 def line_length(x1, x2):
-    return (x2[0]-x1[0])*(x2[0]-x1[0])+(x2[1]-x1[1])*(x2[1]-x1[1])
+    return np.sqrt((x2[0]-x1[0])*(x2[0]-x1[0])+(x2[1]-x1[1])*(x2[1]-x1[1])) ## CHANGED ##
 
 def add_to_endpoints(x1):
     val_exist = False
@@ -106,7 +106,7 @@ def add_coincident_lines(x1,x2,x3,x4):
         x13 > sum_length or \
         x23 > sum_length:
             return 0 #lines do not overlap
-    if  x14 + x23 == sum_length:
+    if  x14 + x23 == x13 + x24: ## CHANGED ##
         # lines intersect at a point
         if x13 == 0:
             add_to_intercepts(x1)
@@ -268,15 +268,13 @@ def make_graph(line):
                     if points2 == streets[key2][0]:
                         b1 = b2
                         continue
-                    if intersect_on_line(a1,a2, b1, b2) == 1:
-                        I = seg_intersect(a1,a2, b1,b2)
-                        add_vertices(a1, a2, I)
-                        add_vertices(b1, b2, I)
-                    if intersect_on_line == 2:
-                        I = seg_intersect(a1,a2, b1,b2)
-                        print I
-                        if I <> []:
+                    if intersect_on_line(a1,a2,b1,b2) == 2: ## CHANGED ##
                           add_coincident_lines(a1,a2,b1,b2)
+                    else:
+                        I = seg_intersect(a1,a2, b1,b2)
+                        if find_ints_on_line(a1, a2, [I]) <> [] and find_ints_on_line(a1, a2, [I]) == find_ints_on_line(b1, b2, [I]): ## CHANGED ##
+                            add_vertices(a1, a2, I)
+                            add_vertices(b1, b2, I)
                     b1 = b2
             a1 = a2
 
@@ -385,7 +383,7 @@ def validate(line):
         sys.stdout.write("Error: The function is incomplete for '" + line + "'")
         return 0
     #1.2 Check for "<street name>"
-    first_quote = line[2:3]
+    first_quote = line[2:].strip()[:1] ## CHANGED ##
     if first_quote <> '"' and first_char not in ['g','G']:
         line = line.replace('\n',"")
         sys.stdout.write("Error: The formatting for streetname is invalid in '" + line + "'")
@@ -470,7 +468,7 @@ while True:
             make_graph(line)
         # print 'read a line:', line
 
-print 'Finished reading input'
+# print 'Finished reading input'
 # return exit code 0 on successful termination
 sys.exit(0)
 
