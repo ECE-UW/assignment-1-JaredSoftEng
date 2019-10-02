@@ -268,13 +268,13 @@ def make_graph(line):
                     if points2 == streets[key2][0]:
                         b1 = b2
                         continue
-                    if intersect_on_line(a1,a2, b1, b2) == 1:
+                    if intersect_on_line(a1,a2,b1,b2) == 2: ## CHANGED ##
+                          add_coincident_lines(a1,a2,b1,b2)
+                    else:
                         I = seg_intersect(a1,a2, b1,b2)
-                        if find_ints_on_line(a1, a2, [I]) == find_ints_on_line(b1, b2, [I]): ## CHANGED ##
+                        if find_ints_on_line(a1, a2, [I]) <> [] and find_ints_on_line(a1, a2, [I]) == find_ints_on_line(b1, b2, [I]): ## CHANGED ##
                             add_vertices(a1, a2, I)
                             add_vertices(b1, b2, I)
-                    if intersect_on_line(a1,a2,b1,b2) == 2: ## CHANGED ## 
-                          add_coincident_lines(a1,a2,b1,b2)
                     b1 = b2
             a1 = a2
 
