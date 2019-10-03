@@ -328,11 +328,11 @@ def streets_add(line):
     keys = list(streets.keys())
     for key in keys:
         if key.lower() == streetname.lower() :
-            sys.stdout.write("Error: The street '" + streetname + "' already exists.")
+            sys.stderr.write("Error: The street '" + streetname + "' already exists.")
             return(0)
     vertices = line.split('"')[2].replace(" ","").replace(")(",")!!(").replace("\n","").replace("(","").replace(")","").split("!!")
     if len(vertices) < 2:
-        sys.stdout.write("Error: The street needs to have at least two points.")
+        sys.stderr.write("Error: The street needs to have at least two points.")
         return(0)
     streets.update({streetname:vertices})
     return 1
@@ -345,11 +345,11 @@ def streets_change(line):
         if key.lower() == streetname.lower() :
             street_exists = True
     if street_exists == False:
-        sys.stdout.write("Error: The street '" + streetname + "' does not exist.")
+        sys.stderr.write("Error: The street '" + streetname + "' does not exist.")
         return(0)
     vertices = line.split('"')[2].replace(" ","").replace(")(",")!!(").replace("\n","").replace("(","").replace(")","").split("!!")
     if len(vertices) < 2:
-        sys.stdout.write("Error: The street needs to have at least two points.")
+        sys.stderr.write("Error: The street needs to have at least two points.")
         return(0)
 
     streets_remove(line)
@@ -365,7 +365,7 @@ def streets_remove(line):
             streets.pop(key)
             street_exists = True
     if street_exists == False:
-        sys.stdout.write("Error: The street '" + streetname + "' does not exist.")
+        sys.stderr.write("Error: The street '" + streetname + "' does not exist.")
         return(0)
     return 1
 
@@ -380,13 +380,13 @@ def validate(line):
     v = r.findall(first_char)
     if (first_space <> " " or v == []) and first_char not in ['g','G'] :
         line = line.replace('\n',"")
-        sys.stdout.write("Error: The function is incomplete for '" + line + "'")
+        sys.stderr.write("Error: The function is incomplete for '" + line + "'")
         return 0
     #1.2 Check for "<street name>"
     first_quote = line[2:].strip()[:1] ## CHANGED ##
     if first_quote <> '"' and first_char not in ['g','G']:
         line = line.replace('\n',"")
-        sys.stdout.write("Error: The formatting for streetname is invalid in '" + line + "'")
+        sys.stderr.write("Error: The formatting for streetname is invalid in '" + line + "'")
         return 0
     try:
         streetname = line.split('"')[1]
@@ -394,14 +394,14 @@ def validate(line):
         v = r.findall(streetname)
         if v <> [streetname] :
             streetname.replace('\n',"")
-            sys.stdout.write("Error: The streetname '" + streetname + "' contains invalid characters.")
+            sys.stderr.write("Error: The streetname '" + streetname + "' contains invalid characters.")
             return 0
         #1.3 If any text exists after the last '"', it needs to match the format of (n,n)
         rest = line.split('"')[2].replace('\n',"")
         r = re.compile(r'[-,0-9() ]+')
         v = r.findall(rest)
         if v <> [rest] and rest <> "":
-            sys.stdout.write("Error: The listed coordinates '" + rest + "' contains invalid characters.")
+            sys.stderr.write("Error: The listed coordinates '" + rest + "' contains invalid characters.")
             return 0
         vertices = line.split('"')[2].replace(" ","").replace(")(",")!!(").replace("\n","").split("!!")
         r = re.compile(r'[(][-]?[0-9]+,[-]?[0-9]+\)')
@@ -409,11 +409,11 @@ def validate(line):
             v = r.findall(e)
             if v <> [e] and e <> '':
                 line = line.replace('\n',"")
-                sys.stdout.write( "Error: The co-ordinates in '" + line + "' were invalid"  )
+                sys.stderr.write( "Error: The co-ordinates in '" + line + "' were invalid"  )
                 return 0
     except:
         if first_char not in ['g', 'G']:
-            sys.stdout.write("Error: Text after the function is missing in '" + line + "'" )
+            sys.stderr.write("Error: Text after the function is missing in '" + line + "'" )
             return 0
 
     # 2. Check if function character is valid
@@ -421,7 +421,7 @@ def validate(line):
     v = r.findall(first_char)
     if v == [] :
         line = line.replace('\n',"")
-        sys.stdout.write( "Error: The function '" + line[:1] + "' is not valid in '" + line + "'" )
+        sys.stderr.write( "Error: The function '" + line[:1] + "' is not valid in '" + line + "'" )
         return 0
 
     return 1 # Success message
@@ -445,18 +445,18 @@ while True:
         break
     if validate(line) == 0 :
         # An error was encountered. Write a newline to stdout
-        sys.stdout.write('\n')
+        sys.stderr.write('\n')
     else:
         if line[:1] in ['a', "A"]:
             if streets_add(line) == 0:
-                sys.stdout.write('\n')
+                sys.stderr.write('\n')
             # print streets
         if line[:1] in ['c', 'C']:
             if streets_change(line) == 0:
-                sys.stdout.write('\n')
+                sys.stderr.write('\n')
         if line[:1] in ['r', 'R']:
             if streets_remove(line) == 0:
-                sys.stdout.write('\n')
+                sys.stderr.write('\n')
         if line[:1] in ['g', 'G']:
             # reset all variables
             lines = {}
